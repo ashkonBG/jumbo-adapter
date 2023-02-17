@@ -1,0 +1,108 @@
+{
+  "name": "@jumbo-supermarkten/gorillas-fulfillment-adapter-server",
+  "version": "1.0.0-development",
+  "private": true,
+  "description": "Communication adapter for Gorillas fulfillment partner",
+  "repository": {
+    "type": "git",
+    "url": "git@github.com:jumbo-supermarkten/gorillas-fulfillment-adapter.git"
+  },
+  "license": "UNLICENSED",
+  "type": "module",
+  "scripts": {
+    "clean": "rimraf dist && rimraf src/types",
+    "compile": "pnpm generate:types && tsc",
+    "dev": "NODE_OPTIONS='--es-module-specifier-resolution=node' nodemon --esm --require dotenv/config ./src/server.ts | pino-pretty --config .pino-prettyrc.cjs",
+    "fix": "xo --fix && sort-package-json package.json",
+    "generate:types": "hallo-api types",
+    "preinstall": "npx only-allow pnpm",
+    "postinstall": "pnpm generate:types",
+    "lint": "xo && sort-package-json -c package.json",
+    "start": "node --es-module-specifier-resolution=node dist/server.js",
+    "test": "ava",
+    "test:coverage": "pnpm c8 --reporter=lcov --check-coverage --lines 65 ava"
+  },
+  "xo": {
+    "prettier": true,
+    "rules": {
+      "import/no-unassigned-import": 0,
+      "@typescript-eslint/naming-convention": [
+        "error",
+        {
+          "selector": "variable",
+          "format": [
+            "camelCase",
+            "UPPER_CASE"
+          ]
+        }
+      ]
+    },
+    "space": 2
+  },
+  "ava": {
+    "extensions": {
+      "ts": "module"
+    },
+    "files": [
+      "src/**/*.spec.ts"
+    ],
+    "nodeArguments": [
+      "--loader=ts-node/esm",
+      "--experimental-specifier-resolution=node"
+    ],
+    "require": [
+      "reflect-metadata",
+      "dotenv/config"
+    ]
+  },
+  "dependencies": {
+    "@fastify/static": "^5.0.2",
+    "@jumbo-supermarkten/vendors-clients-axios-implementation": "^0.1.3",
+    "@jumbo-supermarkten/vendors-clients-customer-service": "^1.0.0",
+    "@jumbo-supermarkten/vendors-clients-intershop": "^1.4.0",
+    "@jumbo-supermarkten/vendors-clients-order-service": "^1.1.0",
+    "@jumbo-supermarkten/vendors-clients-store-service": "^1.0.1",
+    "axios": "^0.27.2",
+    "dd-trace": "^2.11.0",
+    "dotenv": "^16.0.1",
+    "envalid": "^7.3.1",
+    "fastify": "^3.29.1",
+    "fastify-openapi-glue": "^2.7.2",
+    "gorillas-partner-platform-client": "workspace:../gorillas-partner-platform-client",
+    "hot-shots": "^9.3.0",
+    "http-status-codes": "^2.2.0",
+    "mongoose": "^6.4.7",
+    "pino": "^7.11.0",
+    "reflect-metadata": "^0.1.13",
+    "serialize-error": "^8.1.0",
+    "swagger-ui-dist": "^4.13.0",
+    "tsyringe": "^4.7.0"
+  },
+  "devDependencies": {
+    "@jumbo-supermarkten/hallo-api-cli": "^0.7.2",
+    "@semantic-release/git": "^10.0.1",
+    "@types/jsdom": "^16.2.15",
+    "@types/node": "^18.7.23",
+    "@types/swagger-ui-dist": "^3.30.1",
+    "ava": "^4.3.3",
+    "c8": "^7.12.0",
+    "nodemon": "^2.0.19",
+    "pino-pretty": "^9.1.0",
+    "rimraf": "^3.0.2",
+    "semantic-release": "^19.0.3",
+    "sort-package-json": "^1.57.0",
+    "testdouble": "^3.16.6",
+    "ts-node": "^10.9.1",
+    "typescript": "^4.7.4",
+    "webpack": "^5.74.0",
+    "xo": "^0.52.3"
+  },
+  "engines": {
+    "node": "18",
+    "npm": "use-pnpm-instead",
+    "pnpm": "7"
+  },
+  "hallo-api": {
+    "oas": "../../oas.yml"
+  }
+}

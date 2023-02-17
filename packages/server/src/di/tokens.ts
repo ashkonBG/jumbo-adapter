@@ -1,0 +1,22 @@
+export const injectionTokens = {
+  Axios: Symbol('Axios'),
+  CustomerServiceClient: Symbol('CustomerServiceClient'),
+  Fastify: Symbol('Fastify'),
+  GorillasPartnerPlatformClient: Symbol('GorillasPartnerPlatformClient'),
+  GorillasPartnerPlatformClientConfig: Symbol('GorillasPartnerPlatformConfig'),
+  GorillasPartnerPlatformClientAuthenticationProxy: Symbol(
+    'GorillasPartnerPlatformClientAuthenticationProxy',
+  ),
+  GorillasServiceConfig: Symbol('GorillasServiceConfig'),
+  IntershopClient: Symbol('IntershopClient'),
+  LoggerConfig: Symbol('LoggerConfig'),
+  OasConfig: Symbol('OasConfig'),
+  OrderServiceClient: Symbol('OrderServiceClient'),
+  ProductMapJumboXGorillas: Symbol('ProductMapJumboXGorillas'),
+  RequestAwareLogger: Symbol('RequestAwareLogger'),
+  ServerConfig: Symbol('ServerConfig'),
+  SwaggerUiConfig: Symbol('SwaggerUiConfig'),
+  StoreServiceClient: Symbol('StoreServiceClient'),
+  MetricsClient: Symbol('MetricsClient'),
+  MetricsConfig: Symbol('MetricsConfig'),
+};

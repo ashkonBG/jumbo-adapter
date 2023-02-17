@@ -1,0 +1,42 @@
+{
+  "name": "gorillas-partner-platform-client",
+  "version": "1.0.0",
+  "private": "true",
+  "description": "A generated API client for the external Gorillas Partner Platform",
+  "license": "UNLICENSED",
+  "type": "module",
+  "main": "dist/entry.js",
+  "types": "dist/entry.d.ts",
+  "files": [
+    "dist"
+  ],
+  "scripts": {
+    "clean": "rimraf dist",
+    "compile": "tsc",
+    "fix": "sort-package-json package.json",
+    "generate": "pnpm generate:types && pnpm generate:client",
+    "generate:client": "hallo-api client",
+    "generate:types": "hallo-api types",
+    "preinstall": "npx only-allow pnpm",
+    "lint": "sort-package-json -c package.json"
+  },
+  "dependencies": {
+    "hot-shots": "^9.3.0",
+    "url-template": "^3.1.0"
+  },
+  "devDependencies": {
+    "@jumbo-supermarkten/hallo-api-cli": "^0.7.2",
+    "@types/node": "^18.7.23",
+    "rimraf": "^3.0.2",
+    "sort-package-json": "^1.57.0",
+    "typescript": "^4.7.4"
+  },
+  "engines": {
+    "node": "18",
+    "npm": "use-pnpm-instead",
+    "pnpm": "7"
+  },
+  "hallo-api": {
+    "oas": "oas.yml"
+  }
+}

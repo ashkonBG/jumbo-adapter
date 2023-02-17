@@ -1,0 +1,524 @@
+openapi: 3.0.0
+info:
+  title: Gorillas Partner Platform
+  description: |-
+    The Gorillas Partner Platform allows partners to place orders that will be fulfilled by Gorillas.
+  contact:
+    email: sre@gorillasapp.com
+  version: 0.0.2
+servers:
+  - url: "http://localhost/"
+tags:
+  - name: assortment
+    description: Everything related to assortment.
+  - name: geocheck
+    description: Everything related to geo eligibility for q-com service.
+  - name: order
+    description: Everything related to orders.
+  - name: partner
+    description: Everything related to partner.
+paths:
+  /assortment:
+    get:
+      tags:
+        - assortment
+      summary: Get assortment for the country associated to the partner
+      description: |-
+        Retrieve the global assortment for the country associated to the partner.
+        
+        In every secured api response, Gorillas will include a `x-valid-until` header. This header will allow the partner to check for the validity of the credentials.
+
+        **It is the partner responsability to implement credentials renewal before expiration.**
+      operationId: getAssortment
+      responses:
+          "200":
+            description: Successful operation
+            headers:
+              x-valid-until:
+                description: date time the api key is valid until
+                schema:
+                  type: string
+                  format: date-time
+                  example: 2022-10-13T09:12:28Z
+            content:
+              application/json:
+                schema:
+                  $ref: "#/components/schemas/GetAssortmentResponse"
+          "401":
+            description: Unauthorized. Either the x-api-key has not been set, or the api key is not valid anymore or the api key has been revoked.
+          "405":
+            description: Method not allowed
+      security:
+        - x-api-key: []
+        - x-api-secret: []
+  /geocheck/checkEligibility:
+    post:
+      tags:
+        - geocheck
+      summary: Check eligibility of a given address for q-com service.
+      description: |-
+        Retrieve the nearest MFC (Micro-Fulfillment Center) to an address.
+
+        In every secured api response, Gorillas will include a `x-valid-until` header. This header will allow the partner to check for the validity of the credentials.
+
+        **It is the partner responsability to implement credentials renewal before expiration.**
+      operationId: postGeocheck
+      requestBody:
+       description: Address description
+       content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/CheckEligibilityRequest"
+       required: true
+      responses:
+        "200":
+          description: Successful operation
+          headers:
+            x-valid-until:
+              description: date time the api key is valid until
+              schema:
+                type: string
+                format: date-time
+                example: 2022-10-13T09:12:28Z
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckEligibilityResponse"
+        "401":
+          description: Unauthorized. Either the x-api-key has not been set, or the api key is not valid anymore or the api key has been revoked.
+        "404":
+          description: Not found. No MFC matching the input address has been found.
+          headers:
+            x-valid-until:
+              description: date time the api key is valid until
+              schema:
+                type: string
+                format: date-time
+                example: 2022-10-13T09:12:28Z
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/CheckEligibilityNotFoundResponse"
+        "405":
+          description: Method not allowed
+        "415":
+          description: Unsupported media type, this api only allows for application/json content. Make sure the Content-type is properly set.
+      security:
+        - x-api-key: []
+        - x-api-secret: []
+  /order:
+    post:
+      tags:
+        - order
+      summary: Place an order.
+      description: |-
+        Place an order in Gorillas system. The order status will be updated in the partner's system through webhook notification.
+
+        In every secured api response, Gorillas will include a `x-valid-until` header. This header will allow the partner to check for the validity of the credentials.
+
+        **It is the partner responsability to implement credentials renewal before expiration.**
+      operationId: postOrder
+      requestBody:
+       description: Order definition
+       content:
+        application/json:
+          schema:
+            $ref: "#/components/schemas/OrderRequest"
+       required: true
+      responses:
+        "201":
+          description: Successful operation
+          headers:
+            x-valid-until:
+              description: date time the api key is valid until
+              schema:
+                type: string
+                format: date-time
+                example: 2022-10-13T09:12:28Z
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/OrderResponse"
+        "401":
+          description: Unauthorized. Either the x-api-key has not been set, or the api key is not valid anymore or the api key has been revoked.
+        "405":
+          description: Method not allowed
+        "415":
+          description: Unsupported media type, this api only allows for application/json content. Make sure the Content-type is properly set.
+      security:
+        - x-api-key: []
+        - x-api-secret: []
+  /partner/webhooks:
+    put:
+      tags:
+        - partner
+      summary: Upsert the webhook callback urls configuration
+      description: |-
+        This api allows a partner to autonomously configure the callback url that Gorillas will use.
+
+        The provided url should be exposed over https, otherwise an error will occur.
+
+        The partner must ensure that the provided url can respond to a GET HTTP call, Gorillas will systematically contact each url to test that the url is reachable. An error will occur if url validation is not possible.
+
+        In every secured api response, Gorillas will include a `x-valid-until` header. This header will allow the partner to check for the validity of the credentials.
+
+        **It is the partner responsability to implement credentials renewal before expiration.**
+      operationId: upsertWebhooks
+      requestBody:
+        description: Upsert the webhook callback urls configuration
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/WebhooksRequest"
+        required: true
+      responses:
+        "200":
+          description: Successful operation
+          headers:
+             x-valid-until:
+              description: date time the api key is valid until
+              schema:
+                type: string
+                format: date-time
+                example: 2022-10-13T09:12:28Z
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiResponse"
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                oneOf:
+                  - $ref: "#/components/schemas/ApiErrorResponseUrlMustBeHttps"
+                  - $ref: "#/components/schemas/ApiErrorResponseUrlCouldntBeVerified"
+        "401":
+          description: Unauthorized. Either the x-api-key has not been set, or the api key is not valid anymore or the api key has been revoked.
+        "405":
+          description: Method not allowed
+        "415":
+          description: Unsupported media type, this api only allows for application/json content. Make sure the Content-type is properly set.
+      security:
+        - x-api-key: []
+        - x-api-secret: []
+  /partner/authentication:
+    put:
+      tags:
+        - partner
+      summary: Renew a partner's authentication key
+      description: |-
+        This api allows the partner's credentials renewal.
+
+        In every secured api response, Gorillas will include a `x-valid-until` header. This header will allow the partner to check for the validity of the credentials.
+
+        **It is the partner responsability to implement credentials renewal before expiration.**
+      operationId: renewAuthenticationKey
+      requestBody:
+        description: Type of authentication key to renew, can be either API or WEBHOOK
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AuthenticationRequest"
+        required: true
+      responses:
+        "200":
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AuthenticationResponse"
+          headers:
+            x-valid-until:
+              description: date time the api key is valid until
+              schema:
+                type: string
+                format: date-time
+                example: 2022-10-13T09:12:28Z
+        "400":
+          description: Bad request
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/ApiErrorResponsePartnerNotFound"
+        "401":
+          description: Unauthorized. Either the x-api-key has not been set, or the api key is not valid anymore or the api key has been revoked.
+        "405":
+          description: Validation exception
+      security:
+        - x-api-key: []
+        - x-api-secret: []
+components:
+  schemas:
+    GetAssortmentResponse:
+      type: object
+      properties:
+        products:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: number
+                example: 211226046
+              title:
+                type: string
+                example: Tequila especial silver 38% vol.
+              codes:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      example: 0402112260462
+                    type:
+                      type: string
+                      example: EAN13
+    CheckEligibilityRequest:
+      type: object
+      properties:
+        address:
+          type: object
+          properties:
+            streetName:
+              type: string
+              example: Nieuwe Leliestraat
+            streetNumber:
+              type: string
+              example: 71
+            postalCode:
+              type: string
+              example: 1015
+            city:
+              type: string
+              example: Amsterdam
+            countryCode:
+              type: string
+              example: NL
+    CheckEligibilityResponse:
+      type: object
+      properties:
+        countryCode:
+          type: string
+          example: NL
+        deliveryEta:
+          type: string
+          example: 15
+        name:
+          type: string
+          example: Oud West | Amsterdam
+        storeId:
+          type: string
+          example: 5ff43deb3203bf3139e47037
+        storeOpen:
+          type: boolean
+          example: true
+    OrderRequest:
+      type: object
+      properties:
+        partnerOrderId:
+          type: string
+          example: 12345-RTE
+        storeId:
+          type: number
+          example: 15
+        created:
+          type: string
+          format: date-time
+          example: 2022-08-13T09:12:28Z
+        customer:
+          type: object
+          properties:
+            firstName:
+              type: string
+              example: John
+            lastName:
+              type: string
+              example: Doe
+            phone:
+              type: string
+              example: +49 30 208518156
+            email:
+              type: string
+              example: john@doe.de
+        address:
+          type: object
+          properties:
+            streetName:
+              type: string
+              example: Schonhauser Allee
+            streetNumber:
+              type: string
+              example: 180
+            postalCode:
+              type: string
+              example: 10119
+            countryCode:
+              type: string
+              example: DE
+            city:
+              type: string
+              example: BERLIN
+        items:
+          type: array
+          items:
+            type: object
+            properties:
+              id:
+                type: number
+                example: 3503939981930
+              name:
+                type: string
+                example: banana
+              quantity:
+                type: number
+                example: 5
+        payment:
+          type: object
+          properties:
+            amount:
+              type: number
+              example: 4.25
+            currencyCodeIso:
+              type: string
+              example: EUR
+        deliveryNotes:
+          type: string
+          example: Don't ring the bell, baby Gorilla is sleeping. Leave the bag at the front door.
+        promisedETA:
+          type: number
+          example: 10
+    OrderResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          example: 28e2c2f8-f0c9-4ff7-89c1-cf375abf1ce1
+        partnerOrderId:
+          type: string
+          example: 12345-RTE
+        state:
+          type: string
+          example: created
+        stateChangedOn:
+          type: string
+          format: date-time
+          example: 2022-08-13T09:13:28Z
+    CheckEligibilityNotFoundResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: not_found
+            message:
+              type: string
+              example: Not in delivery area.
+    ApiErrorResponsePartnerNotFound:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: bad_request
+            message:
+              type: string
+              example: Partner with id <id> not found.
+    ApiErrorResponseUrlMustBeHttps:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: bad_request
+            message:
+              type: string
+              example: Webhook callback urls must start with https://.
+    ApiErrorResponseUrlCouldntBeVerified:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+              example: bad_request
+            message:
+              type: string
+              example: <url(s)> could not be verified.
+    AuthenticationRequest:
+      type: object
+      properties:
+        scope:
+          description: The scope of the authentication key to renew. Can be either API or WEBHOOK
+          type: string
+          example: API
+    AuthenticationResponse:
+      type: object
+      properties:
+        secret:
+          description: The renewed api-secret to be used by the partner
+          type: string
+          example: AIzaSyClzfrOzB818x55FASHvX4JuGQciR9lv7q
+        scope:
+          description: The scope of the authentication key to renew. Can be either API or WEBHOOK
+          type: string
+          example: API
+        validUntil:
+          description: Date on which the key is no longer valid
+          type: string
+          format: date-time
+    WebhooksRequest:
+      type: object
+      properties:
+        orderStatus:
+          description: The orderStatus property is the url that will be called every time the order status is updated. This property is not mandatory.
+          type: string
+          format: url
+          example: https://partner.com/orderStatusCallback
+        stockLevel:
+          description: The stockLevel property is the url that will be called every time the stock level of a product changes. This property is not mandatory.
+          type: string
+          format: url
+          example: https://partner.com/stockLevelCallback
+        assortment:
+          description: The assortment property is the url that will be called every time a new product is added to the initial assortment or when a product is activated/deactivated
+          type: string
+          format: url
+          example: https://partner.com/assortmentCallback
+    ApiResponse:
+      type: object
+      properties:
+        code:
+          type: integer
+          format: int32
+        type:
+          type: string
+        message:
+          type: string
+    ApiErrorResponse:
+      type: object
+      properties:
+        error:
+          type: object
+          properties:
+            code:
+              type: string
+            message:
+              type: string
+  securitySchemes:
+    x-api-key:
+      type: apiKey
+      name: x-api-key
+      in: header
+    x-api-secret:
+      type: apiKey
+      name: x-api-secret
+      in: header

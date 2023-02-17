@@ -1,0 +1,4 @@
+environment:
+  NODE_ENV: production
+  DD_TRACE_ENABLED: true
+  DD_ENV: prod

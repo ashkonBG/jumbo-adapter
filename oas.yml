@@ -1,0 +1,232 @@
+openapi: '3.0.3'
+info:
+  title: Gorillas fulfillment adapter
+  version: '0.2'
+  description: Gorillas fulfillment adapter acts as a middleman between the internal Jumbo landscape and the external fulfillment platform
+  contact:
+    name: Jumbo QuickCommerce Team
+    url: https://jumbo-supermarkten.atlassian.net/wiki/spaces/GOR/overview
+tags:
+  - name: health
+  - name: fulfillment-order
+  - name: validate-eligibility
+  - name: public
+servers:
+  - url: http://localhost:3001
+  - url: 'https://gorillas-fulfillment-adapter.internal.{env}.cloud.jumbo.com'
+    variables:
+      env:
+        default: prod
+        enum:
+          - dev
+          - test
+          - acc
+          - prod
+paths:
+  /health/service:
+    get:
+      description: Get service health
+      summary: getHealth
+      tags:
+        - health
+      responses:
+        '204':
+          description: Ok
+        '500':
+          description: Internal Server Error
+      operationId: getHealth
+  /health/instance:
+    get:
+      description: Get service liveness
+      summary: getLiveness
+      tags:
+        - health
+      responses:
+        '204':
+          description: Ok
+        '500':
+          description: Internal Server Error
+      operationId: getLiveness
+  /fulfillment-order:
+    post:
+      operationId: createFulfillmentOrder
+      tags:
+        - fulfillment-order
+      description: Create an order at the (external) fulfillment partner
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                orderId:
+                  description: The internal jumbo order id
+                  type: number
+              required:
+                - orderId
+      responses:
+        '201':
+          description: Created
+        '400':
+          description: Bad Request
+        '500':
+          description: Internal Server Error
+        '502':
+          description: Bad Gateway
+        '504':
+          description: Gateway Timeout
+  /validate-eligibility/address:
+    put:
+      operationId: validateAddressEligibility
+      tags:
+        - validate-eligibility
+      description: Validate with the fulfillment partner if an address is eligible for delivery
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ValidateAddressEligibilityRequest'
+      responses:
+        '200':
+          description: Address eligibility validation successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EligibilityValidationResultResponse'
+        '400':
+          description: Bad Request
+        '500':
+          description: Internal Server Error
+        '504':
+          description: Gateway Timeout
+  /validate-eligibility/order:
+    put:
+      operationId: validateOrderEligibility
+      tags:
+        - validate-eligibility
+      description: Validate with the fulfillment partner if an order is eligible for delivery
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Address'
+      responses:
+        '200':
+          description: Order eligibility validation successful
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EligibilityValidationResultResponse'
+        '400':
+          description: Bad Request
+        '500':
+          description: Internal Server Error
+        '502':
+          description: Bad Gateway
+        '504':
+          description: Gateway Timeout
+  /public/webhooks:
+    get:
+      operationId: acknowledgeWebhook
+      tags:
+        - public
+      description: Acknowledge the existence of this webhook endpoint
+      responses:
+        '204':
+          description: Ok
+    post:
+      operationId: ingestWebhook
+      tags:
+        - public
+      description: Ingest updates from the Gorillas Partner Platform
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+      responses:
+        '202':
+          description: Webhook accepted
+        '500':
+          description: Internal Server Error
+
+
+components:
+  schemas:
+    ValidateAddressEligibilityRequest:
+      type: object
+      description: address and/or location field is required
+      properties:
+        address:
+          $ref: '#/components/schemas/Address'
+        location:
+          $ref: '#/components/schemas/Location'
+    Address:
+      type: object
+      properties:
+        streetName:
+          type: string
+        streetNumber:
+          type: string
+        postalCode:
+          type: string
+        city:
+          type: string
+      required:
+        - streetName
+        - streetNumber
+        - city
+    Location:
+      type: object
+      properties:
+        latitude:
+          type: number
+          format: double
+        longitude:
+          type: number
+          format: double
+      required:
+        - latitude
+        - longitude
+    EligibilityValidationResultResponse:
+      oneOf:
+        - $ref: '#/components/schemas/EligibilityValidationSucceededResult'
+        - $ref: '#/components/schemas/EligibilityValidationFailedResult'
+    EligibilityValidationSucceededResult:
+      properties:
+        isEligible:
+          type: boolean
+          enum:
+            - true
+        quickCommerceWarehouseId:
+          type: string
+        deliveryEta:
+          type: number
+        storeOpen:
+          type: boolean  
+      required:
+        - isEligible
+    EligibilityValidationFailedResult:
+      properties:
+        isEligible:
+          type: boolean
+          enum:
+            - false
+        error:
+          type: object
+          properties:
+            code:
+              description: A stable error code
+              type: string
+            message:
+              description: A message describing why eligibility validation was not met
+              type: string
+          required:
+            - message
+      required:
+        - isEligible
+        - error

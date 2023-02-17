@@ -1,0 +1,30 @@
+{
+  "name": "@jumbo-supermarkten/gorillas-fulfillment-adapter",
+  "version": "1.0.0-development",
+  "private": true,
+  "description": "A monorepo for gorillas-fulfillment-adapter server, event consumer and generated api client",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jumbo-supermarkten/gorillas-fulfillment-adapter.git"
+  },
+  "scripts": {
+    "clean": "pnpm -r clean",
+    "compile": "pnpm -r compile",
+    "fix": "pnpm fix:root; pnpm -r fix",
+    "fix:root": "sort-package-json package.json",
+    "preinstall": "npx only-allow pnpm",
+    "postinstall": "pnpm symlink-oas-file && pnpm compile",
+    "lint": "pnpm lint:root; pnpm -r lint",
+    "lint:root": "spectral lint oas.yml && sort-package-json -c package.json",
+    "symlink-oas-file": "ln -sf ../../oas.yml packages/server/oas.yml",
+    "test": "pnpm -r test",
+    "test:coverage": "pnpm -r test:coverage"
+  },
+  "devDependencies": {
+    "@commitlint/cli": "^16.3.0",
+    "@commitlint/config-conventional": "^16.2.4",
+    "@stoplight/spectral-cli": "^6.4.2",
+    "husky": "^7.0.4",
+    "sort-package-json": "^1.57.0"
+  }
+}

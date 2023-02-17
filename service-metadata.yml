@@ -1,0 +1,31 @@
+name: Gorillas Fulfillment Adapter
+display-name: gorillas-fulfillment-adapter
+responsible-team: QuickCommerce
+description: Adapter used for communicating with the Gorillas partner platform
+documentation:
+  - description: Technical Documentation
+    location: https://github.com/jumbo-supermarkten/gorillas-fulfillment-adapter
+  - description: SwaggerUI (dev)
+    location: https://gorillas-fulfillment-adapter.internal.dev.cloud.jumbo.com/documentation
+  - description: SwaggerUI (test)
+    location: https://gorillas-fulfillment-adapter.internal.test.cloud.jumbo.com/documentation
+  - description: SwaggerUI (acc)
+    location: https://gorillas-fulfillment-adapter.internal.acc.cloud.jumbo.com/documentation
+  - description: SwaggerUI (prod)
+    location: https://gorillas-fulfillment-adapter.internal.prod.cloud.jumbo.com/documentation
+contact:
+  - type: slack
+    value: '#gorillas'
+    description: The public Slack channel for team QuickCommerce
+deployed-resources:
+  kubernetes-namespace: gorillas-fulfillment-adapter
+  kubernetes-deployment-name: gorillas-fulfillment-adapter
+  datadog-name: gorillas-fulfillment-adapter
+monitoring:
+  - type: link
+    description: To be defined
+    location: http://to-be.defined/monitoring/gorillas-fulfillment-adapter
+api-specs:
+  - type: open-api
+    description: Open API specification
+    uri: https://github.com/jumbo-supermarkten/gorillas-fulfillment-adapter/blob/master/oas.yml

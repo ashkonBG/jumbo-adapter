@@ -1,0 +1,2 @@
+environment:
+  DD_ENV: dev

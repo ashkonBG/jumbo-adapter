@@ -1,0 +1,16 @@
+FROM node:18 as builder
+RUN npm install -g pnpm@7
+WORKDIR /home/node
+COPY --chown=node:node . .
+ARG GITHUB_READ_TOKEN
+RUN printf "\n//npm.pkg.github.com/:_authToken=%s" $GITHUB_READ_TOKEN >> .npmrc
+RUN pnpm install --frozen-lockfile
+RUN pnpm --filter @jumbo-supermarkten/gorillas-fulfillment-adapter-server --prod deploy package-to-deploy
+
+FROM node:18
+USER node
+WORKDIR /home/node
+COPY --chown=node:node --from=builder /home/node/oas.yml .
+COPY --chown=node:node --from=builder /home/node/package-to-deploy .
+EXPOSE 3001
+CMD ["npm", "run", "start"]

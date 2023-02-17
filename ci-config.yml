@@ -1,0 +1,12 @@
+dev:
+  targets:
+    - cluster01
+test:
+  targets:
+    - cluster01
+acc:
+  targets:
+    - cluster01
+prod:
+  targets:
+    - cluster01
